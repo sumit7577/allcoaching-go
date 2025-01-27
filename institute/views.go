@@ -20,7 +20,7 @@ func (c *InstituteController) Home() {
 			return nil, err
 		}
 		return map[string]interface{}{
-			"status": "success",
+			"status": "true",
 			"data":   data,
 		}, nil
 	})
@@ -43,7 +43,7 @@ func (c *InstituteController) Get() {
 			}
 
 			return map[string]interface{}{
-				"status": "success",
+				"status": "true",
 				"data":   ins,
 			}, nil
 

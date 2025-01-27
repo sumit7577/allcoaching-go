@@ -1,0 +1,94 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/user/": {
+            "post": {
+                "tags": [
+                    "user"
+                ],
+                "description": "Create a new user\n\u003cbr\u003e",
+                "operationId": "UserController.Create User",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "User data in JSON format",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.User": {
+            "title": "User",
+            "type": "object",
+            "properties": {
+                "Address": {
+                    "type": "string"
+                },
+                "DateJoined": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "DateUpdated": {
+                    "type": "string",
+                    "format": "datetime"
+                },
+                "Email": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Image": {
+                    "type": "string"
+                },
+                "IsActive": {
+                    "type": "boolean"
+                },
+                "IsInstitute": {
+                    "type": "boolean"
+                },
+                "Name": {
+                    "type": "string"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Phone": {
+                    "type": "string"
+                },
+                "Pincode": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "State": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

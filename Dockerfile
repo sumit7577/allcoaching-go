@@ -20,5 +20,5 @@ WORKDIR /usr/bin
 COPY --from=build /app/bin /go/bin
 COPY --from=build ./app/conf /usr/bin/conf
 
-EXPOSE 80
+EXPOSE 8080
 ENTRYPOINT /go/bin/web-app --port 80

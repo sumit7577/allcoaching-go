@@ -6,5 +6,5 @@ services:
       dockerfile: Dockerfile
       context: .
     environment:
-      - VIRTUAL_HOST=your_domain
-      - LETSENCRYPT_HOST=your_domain
+      - VIRTUAL_HOST=80.225.209.180
+      - LETSENCRYPT_HOST=80.225.209.180

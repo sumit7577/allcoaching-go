@@ -21,4 +21,4 @@ COPY --from=build /app/bin /go/bin
 COPY --from=build ./app/conf /usr/bin/conf
 
 EXPOSE 8080
-ENTRYPOINT /go/bin/web-app --port 80
+ENTRYPOINT /go/bin/web-app --port 8080

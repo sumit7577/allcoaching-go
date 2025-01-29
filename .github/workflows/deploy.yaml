@@ -1,0 +1,23 @@
+name: Deploy to Oracle Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: SSH into Server and Deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} opc@80.225.209.180 << 'EOF'
+            sudo docker stop allcoaching_go_container || true
+            sudo docker rm allcoaching_go_container || true
+            sudo docker compose -f allcoaching-go.yaml up -d
+            sudo docker image prune -f
+          EOF

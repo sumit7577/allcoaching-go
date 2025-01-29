@@ -1,6 +1,7 @@
 version: '3'
 services:
   go-web-app:
+    container_name: allcoaching_go
     restart: always
     build:
       dockerfile: Dockerfile

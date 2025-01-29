@@ -15,6 +15,7 @@ type Institute struct {
 	Banner       []*Banner `orm:"rel(m2m); null"`
 	DirectorName string    `orm:"size(150); notnull" valid:"Required; MaxSize(150)"`
 	User         *User     `orm:"rel(one); unique; notnull"`
+	Image        string    `orm:"size(300); null"`
 	DateCreated  time.Time `orm:"auto_now_add;type(datetime)"`
 	DateUpdated  time.Time `orm:"auto_now;type(datetime)"`
 }

@@ -16,6 +16,7 @@ type Course struct {
 	Banner      *Banner    `orm:"rel(fk); null"`
 	Description string     `orm:"type(text); null"`
 	Price       float64    `orm:"decimal(2); notnull" valid:"Required"`
+	Image       string     `orm:"size(300); null"`
 	CreatedAt   time.Time  `orm:"auto_now_add;type(datetime)"`
 	UpdatedAt   time.Time  `orm:"auto_now;type(datetime)"`
 }

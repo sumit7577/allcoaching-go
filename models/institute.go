@@ -38,7 +38,7 @@ func GetAllInstitues() (num int64, institutes []*Institute, err error) {
 func GetInstitute(uid int64) ([]Course, error) {
 	o := orm.NewOrm()
 	var courses []Course
-	_, err := o.QueryTable("course").Filter("Institute__Id", uid).All(&courses, "id", "name", "description", "price", "category", "created_at", "updated_at")
+	_, err := o.QueryTable("course").Filter("Institute__Id", uid).All(&courses, "id", "name", "description", "price", "image", "category", "created_at", "updated_at")
 
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func GetCategoriesWithInstitutes() ([]InstituteSerializer, error) {
 
 	for _, category := range categories {
 		var institutes []*Institute
-		_, err := o.QueryTable("institute").Filter("Category__Id", category.Id).All(&institutes, "id", "name", "about", "director_name", "date_created", "date_updated")
+		_, err := o.QueryTable("institute").Filter("Category__Id", category.Id).All(&institutes, "id", "name", "about", "director_name", "image", "date_created", "date_updated")
 		if err != nil {
 			return nil, err
 		}

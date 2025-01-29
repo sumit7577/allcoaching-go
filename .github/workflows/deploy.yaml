@@ -13,11 +13,27 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
       - name: SSH into Server and Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_PRIVATE_KEY }} opc@80.225.209.180 << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem opc@80.225.209.180 << 'EOF'
+            cd /home/opc/allcoaching-go  # Change to the directory where your docker-compose.yaml is
+            git pull origin master  # Ensure latest changes are pulled
+
+            echo "🛑 Stopping old container..."
             sudo docker stop allcoaching_go_container || true
+
+            echo "🗑 Removing old container..."
             sudo docker rm allcoaching_go_container || true
+
+            echo "🚀 Starting new container..."
             sudo docker compose -f allcoaching-go.yaml up -d
+
+            echo "🧹 Pruning old images..."
             sudo docker image prune -f
+          
           EOF

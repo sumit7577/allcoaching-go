@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  postgres:
+    restart: always
+    image: postgres:latest
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: allcoaching
+      POSTGRES_PASSWORD: Idontknow@1
+      POSTGRES_DB: Allcoaching
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d  # Optional: For custom initialization scripts
+
+volumes:
+  postgres_data:

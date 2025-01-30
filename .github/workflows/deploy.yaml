@@ -21,8 +21,8 @@ jobs:
       - name: SSH into Server and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem opc@80.225.209.180 << 'EOF'
-            cd /home/opc/allcoaching-go  # Change to the directory where your docker-compose.yaml is
-            git pull origin master  # Ensure latest changes are pulled
+            cd /home/opc/allcoaching-go
+            git pull origin master
 
             echo "🛑 Stopping old container..."
             sudo docker stop allcoaching_go_container || true

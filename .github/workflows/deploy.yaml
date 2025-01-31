@@ -27,8 +27,11 @@ jobs:
             echo "🛑 Stopping old container..."
             sudo docker stop allcoaching_go || true
 
-            echo "🗑 Removing old container..."
-            sudo docker rm allcoaching_go || true
+            echo "🛑 Stopping old container..."
+            sudo docker rmi -f allcoaching-go-go-web-app
+
+            echo "🗑 Removing old image..."
+            sudo docker rmi -f allcoaching_go || true
 
             echo "🚀 Starting new container..."
             sudo docker compose -f allcoaching-go.yaml up -d

@@ -44,23 +44,27 @@ func (um *UserManager) CreateUser() (*User, error) {
 		username := generateRandomUsername(um.User.Name)
 		um.User.Password = hashedPassword
 		um.User.Username = username
-		_, err = txOrm.Insert(um.User)
+		id, err := txOrm.Insert(um.User)
+		um.User.Id = uint64(id)
 
 		if err != nil {
 			return err // This will trigger a rollback
 		}
-		authToken, nil := generateAuthToken()
+		return nil
+		/*authToken, nil := generateAuthToken()
 		authEntry := &AuthToken{
 			Key:     authToken,
 			User:    um.User,
 			Created: time.Now(),
 		}
 		_, err = txOrm.Insert(authEntry)
+		fmt.Printf("authEntry: %v\n", authEntry)
+		fmt.Printf("authEntry: %v\n", um.User)
 
 		if err != nil {
 			return err
-		}
-		return nil
+		}*/
+
 	})
 
 	if err != nil {

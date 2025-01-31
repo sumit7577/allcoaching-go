@@ -25,10 +25,10 @@ jobs:
             git pull origin master
 
             echo "🛑 Stopping old container..."
-            sudo docker stop allcoaching_go_container || true
+            sudo docker stop allcoaching_go || true
 
             echo "🗑 Removing old container..."
-            sudo docker rm allcoaching_go_container || true
+            sudo docker rm allcoaching_go || true
 
             echo "🚀 Starting new container..."
             sudo docker compose -f allcoaching-go.yaml up -d

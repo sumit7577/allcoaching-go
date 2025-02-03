@@ -12,6 +12,7 @@ import (
 const (
 	// authSessionKeyAuthenticated stores the key used to store the authentication status in the session
 	IsAuthenticated = "authenticated"
+	IsPagination    = "pagination"
 )
 
 // RestApi struct manages authentication, validation, and permissions

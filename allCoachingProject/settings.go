@@ -4,7 +4,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
 	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3" // Import SQLite driver
+	//_ "github.com/mattn/go-sqlite3" // Import SQLite driver
 )
 
 func SetDatabase() {

@@ -36,14 +36,16 @@ func GetAllInstitues() (num int64, institutes []*Institute, err error) {
 }
 
 type CourseSerializer struct {
-	Course []*Course       `json:"course"`
-	Videos []*CourseVideos `json:"videos"`
+	Course    []*Course       `json:"course"`
+	Videos    []*CourseVideos `json:"videos"`
+	Institute *Institute      `json:"institute"`
 }
 
 func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	o := orm.NewOrm()
 	var courses []*Course
 	var videos []*CourseVideos
+	institute := Institute{}
 
 	query := &Pagination{
 		Offset: page,
@@ -63,9 +65,16 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 		return nil, err
 	}
 
+	errs := o.QueryTable("institute").Filter("Id", uid).One(&institute)
+
+	if errs != nil {
+		return nil, errs
+	}
+
 	serializer := &CourseSerializer{
-		Course: courses,
-		Videos: videos,
+		Course:    courses,
+		Videos:    videos,
+		Institute: &institute,
 	}
 
 	data, err := query.CreatePagination(serializer)

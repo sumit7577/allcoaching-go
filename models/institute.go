@@ -36,9 +36,10 @@ func GetAllInstitues() (num int64, institutes []*Institute, err error) {
 }
 
 type CourseSerializer struct {
-	Course    []*Course       `json:"course"`
-	Videos    []*CourseVideos `json:"videos"`
-	Institute *Institute      `json:"institute"`
+	Course     []*Course       `json:"course"`
+	Videos     []*CourseVideos `json:"videos"`
+	TestSeries []*TestSeries   `json:"testseries"`
+	Institute  *Institute      `json:"institute"`
 }
 
 func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
@@ -46,6 +47,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	var courses []*Course
 	var videos []*CourseVideos
 	institute := Institute{}
+	var testSeries []*TestSeries
 
 	query := &Pagination{
 		Offset: page,
@@ -53,28 +55,28 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 		query:  o.QueryTable("course").Filter("Institute__Id", uid),
 	}
 
+	//Fetch Course
 	_, err := query.Paginate().All(&courses, "id", "name", "description", "price", "image", "category", "created_at", "updated_at")
 
-	if err != nil {
-		return nil, err
-	}
+	//Fetch one Institute all course videos
 	_, err = o.QueryTable("course_videos").
 		Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&videos)
 
+	//Fetch one Institute all course test series
+	_, err = o.QueryTable("test_series").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")
+
+	//Fetch institute detail
+	err = o.QueryTable("institute").Filter("Id", uid).One(&institute)
+
 	if err != nil {
 		return nil, err
 	}
 
-	errs := o.QueryTable("institute").Filter("Id", uid).One(&institute)
-
-	if errs != nil {
-		return nil, errs
-	}
-
 	serializer := &CourseSerializer{
-		Course:    courses,
-		Videos:    videos,
-		Institute: &institute,
+		Course:     courses,
+		Videos:     videos,
+		Institute:  &institute,
+		TestSeries: testSeries,
 	}
 
 	data, err := query.CreatePagination(serializer)

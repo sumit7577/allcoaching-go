@@ -2,6 +2,7 @@ package routers
 
 import (
 	"allcoaching-go/institute"
+	"allcoaching-go/test_series"
 	"allcoaching-go/users"
 
 	"github.com/beego/beego/v2/server/web"
@@ -18,6 +19,11 @@ func init() {
 		web.NSNamespace("/institute",
 			web.NSInclude(
 				&institute.InstituteController{},
+			),
+		),
+		web.NSNamespace("/testSeries",
+			web.NSInclude(
+				&test_series.TestSeriesController{},
 			),
 		),
 	)

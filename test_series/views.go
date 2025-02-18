@@ -46,15 +46,14 @@ func (c *TestSeriesController) Result() {
 }
 
 func (c *TestSeriesController) Submit() {
-	c.Models = &models.TestSeriesAttempt{}
+	c.Models = &models.SubmitTestSerializer{}
 	c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {
-		c.Models.(*models.TestSeriesAttempt).User = c.CurrentUser
 
 		c.Create(func() (interface{}, error) {
-			request := c.Models.(*models.TestSeriesAttempt)
+			request := c.Models.(*models.SubmitTestSerializer)
 
-			data, err := models.SubmitAttempt(request)
+			data, err := models.SubmitTestSeries(request, c.CurrentUser)
 
 			if err != nil {
 				return nil, err

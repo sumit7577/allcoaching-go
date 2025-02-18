@@ -126,7 +126,11 @@ func CreateAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
 	return &attempt, nil
 }
 
-func SubmitAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
+type SubmitTestSerializer struct {
+	TestSeries int64 `json:"testseries" valid:"Required"`
+}
+
+func SubmitTestSeries(payload *SubmitTestSerializer, user *User) (*TestSeriesAttempt, error) {
 	o := orm.NewOrm()
 	attempt := TestSeriesAttempt{}
 
@@ -134,11 +138,6 @@ func SubmitAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
 	err := o.QueryTable("test_series").Filter("Id", payload.TestSeries).One(&testSeries)
 	if err != nil {
 		return nil, err
-	}
-
-	var questionsData []map[string]interface{}
-	if err := json.Unmarshal([]byte(testSeries.Questions), &questionsData); err != nil {
-		return nil, errors.New("Failed to parse questions data")
 	}
 
 	solution := TestSeriesSolution{}
@@ -154,7 +153,7 @@ func SubmitAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
 
 	err = o.QueryTable("test_series_attempt").
 		Filter("TestSeries__id", payload.TestSeries).
-		Filter("User__id", payload.User).
+		Filter("User__id", user).
 		One(&attempt)
 
 	if err != nil {
@@ -175,9 +174,9 @@ func SubmitAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
 	totalScore := 0.0
 	totalMarks := 0.0
 
-	for i, question := range questionsData {
-		questionID := fmt.Sprintf("%v", question["Question"])
-		answer := correctAnswers[i]["Answer"]
+	for _, question := range correctAnswers {
+		questionID := fmt.Sprintf("%v", question["UUID"])
+		answer := question["Answer"]
 		positiveMark := question["Positive Marks"].(string)
 		negativeMark := question["Negative Marks"].(string)
 		positiveMarks, err := strconv.ParseFloat(positiveMark, 64)

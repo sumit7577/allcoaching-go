@@ -19,7 +19,7 @@ func init() {
 		web.ControllerComments{
 			Method:           "Result",
 			Router:           "/result",
-			AllowHTTPMethods: []string{"get"},
+			AllowHTTPMethods: []string{"post"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})

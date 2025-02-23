@@ -49,6 +49,39 @@ func init() {
 	orm.RegisterModel(new(TestSeriesAttempt))
 }
 
+type ResultSerialzer struct {
+	Solutions  *TestSeriesSolution `json:"solutions"`
+	UserAnswer *TestSeriesAttempt  `json:"answer"`
+}
+
+func CreateResult(payload *SubmitTestSerializer, user *User) (*ResultSerialzer, error) {
+	attempt := TestSeriesAttempt{}
+	o := orm.NewOrm()
+	err := o.QueryTable("test_series_attempt").
+		Filter("TestSeries__id", payload.TestSeries).
+		Filter("User__id", user).
+		One(&attempt)
+
+	if err != nil {
+		return nil, errors.New("User attempt not found")
+	}
+
+	solutions := TestSeriesSolution{}
+
+	errs := o.QueryTable("test_series_solution").
+		Filter("TestSeries__id", payload.TestSeries).
+		One(&solutions)
+
+	if errs != nil {
+		return nil, errors.New("TestSeries Solution not found")
+	}
+
+	return &ResultSerialzer{
+		Solutions:  &solutions,
+		UserAnswer: &attempt,
+	}, nil
+}
+
 func CreateAttempt(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {
 	o := orm.NewOrm()
 	attempt := TestSeriesAttempt{}

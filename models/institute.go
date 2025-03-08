@@ -40,6 +40,7 @@ type CourseSerializer struct {
 	Videos     []*CourseVideos `json:"videos"`
 	TestSeries []*TestSeries   `json:"testseries"`
 	Institute  *Institute      `json:"institute"`
+	Documents  []*Documents    `json:"documents"`
 }
 
 func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
@@ -48,6 +49,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	var videos []*CourseVideos
 	institute := Institute{}
 	var testSeries []*TestSeries
+	var documents []*Documents
 
 	query := &Pagination{
 		Offset: page,
@@ -65,6 +67,8 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	//Fetch one Institute all course test series
 	_, err = o.QueryTable("test_series").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")
 
+	_, err = o.QueryTable("documents").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&documents, "id", "name", "description", "file", "created_at", "updated_at")
+
 	//Fetch institute detail
 	err = o.QueryTable("institute").Filter("Id", uid).One(&institute)
 
@@ -77,6 +81,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 		Videos:     videos,
 		Institute:  &institute,
 		TestSeries: testSeries,
+		Documents:  documents,
 	}
 
 	data, err := query.CreatePagination(serializer)

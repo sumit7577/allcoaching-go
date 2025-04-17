@@ -13,7 +13,7 @@ type Course struct {
 	Name        string     `orm:"size(150); notnull" valid:"Required; MaxSize(150)"`
 	Institute   *Institute `orm:"rel(fk); notnull"`
 	Category    *Category  `orm:"rel(fk); null"`
-	Banner      *Banner    `orm:"rel(fk); null"`
+	Banner      []*Banner  `orm:"rel(m2m); null"`
 	Collection  string     `orm:"type(jsonb); null"`
 	Description string     `orm:"type(text); null"`
 	Price       float64    `orm:"decimal(2); notnull" valid:"Required"`

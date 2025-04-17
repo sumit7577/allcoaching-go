@@ -12,7 +12,7 @@ type Institute struct {
 	Name         string    `orm:"size(100); null" valid:"MaxSize(100)"`
 	About        string    `orm:"type(text); null"`
 	Category     *Category `orm:"rel(fk); null"`
-	Banner       []*Banner `orm:"rel(m2m); null"`
+	Banner       *Banner   `orm:"rel(fk); null"`
 	DirectorName string    `orm:"size(150); notnull" valid:"Required; MaxSize(150)"`
 	User         *User     `orm:"rel(one); unique; notnull"`
 	Image        string    `orm:"size(300); null"`
@@ -58,11 +58,10 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	}
 
 	//Fetch Course
-	_, err := query.Paginate().All(&courses, "id", "name", "description", "price", "image", "category", "created_at", "updated_at")
+	_, err := query.Paginate().RelatedSel("banner", "category").All(&courses)
 
 	//Fetch one Institute all course videos
-	_, err = o.QueryTable("course_videos").
-		Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&videos)
+	_, err = o.QueryTable("course_videos").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&videos)
 
 	//Fetch one Institute all course test series
 	_, err = o.QueryTable("test_series").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")

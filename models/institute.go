@@ -58,7 +58,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	}
 
 	//Fetch Course
-	_, err := query.Paginate().RelatedSel("banner", "category").All(&courses)
+	_, err := query.Paginate().RelatedSel("category").All(&courses)
 
 	//Fetch one Institute all course videos
 	_, err = o.QueryTable("course_videos").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&videos)
@@ -69,7 +69,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	_, err = o.QueryTable("documents").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&documents, "id", "name", "description", "file", "created_at", "updated_at")
 
 	//Fetch institute detail
-	err = o.QueryTable("institute").Filter("Id", uid).One(&institute)
+	err = o.QueryTable("institute").RelatedSel("banner", "category").Filter("Id", uid).One(&institute)
 
 	if err != nil {
 		return nil, err

@@ -15,6 +15,7 @@ func (c *PostController) Get() {
 	//c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {
 		page, _ := c.GetInt("page")
+		println(page)
 		posts, err := models.GetAllPosts(page)
 		if err != nil {
 			return nil, errors.New("Posts Not Found")

@@ -10,6 +10,7 @@ type Pagination struct {
 	Offset int
 	Limit  int
 	query  orm.QuerySeter
+	Count  int64
 }
 
 type PaginationSerializer struct {
@@ -20,7 +21,7 @@ type PaginationSerializer struct {
 }
 
 func (p *Pagination) Paginate() orm.QuerySeter {
-	return p.query.Offset(p.Offset).Limit(p.Limit)
+	return p.query.Offset(p.Offset * p.Limit).Limit(p.Limit)
 }
 
 func (p *Pagination) CreatePagination(data interface{}) (*PaginationSerializer, error) {
@@ -28,6 +29,7 @@ func (p *Pagination) CreatePagination(data interface{}) (*PaginationSerializer, 
 	if err != nil {
 		return nil, err
 	}
+	p.Count = count
 
 	totalPages := (count + int64(p.Limit) - 1) / int64(p.Limit)
 	currentPage := p.Offset

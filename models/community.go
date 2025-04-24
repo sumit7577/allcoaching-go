@@ -45,6 +45,7 @@ type CommunityPostWithMeta struct {
 	Post         *CommunityPost `json:"post"`     // Embedding the original CommunityPost struct
 	LikeCount    int64          `json:"likes"`    // Field for the number of likes
 	CommentCount int64          `json:"comments"` // Field for the number of comments
+	UserLiked    bool           `json:"user_liked"`
 }
 
 type LikeResult struct {
@@ -57,7 +58,7 @@ type CommentResult struct {
 	Count  int64 `orm:"column(count)"`
 }
 
-func GetAllPosts(page int) (*PaginationSerializer, error) {
+func GetAllPosts(page int, user *User) (*PaginationSerializer, error) {
 	o := orm.NewOrm()
 	var posts []*CommunityPost
 
@@ -111,12 +112,30 @@ func GetAllPosts(page int) (*PaginationSerializer, error) {
 		commentMap[cr.PostID] = cr.Count
 	}
 
+	var likedPostIDs []orm.Params
+	_, err = o.QueryTable("community_like").
+		Filter("user_id", user.Id).
+		Filter("post_id__in", postIDs).
+		Values(&likedPostIDs, "post_id")
+
+	likedMap := make(map[int64]bool)
+	for _, lp := range likedPostIDs {
+		if postID, ok := lp["Post__Post"].(int64); ok {
+			likedMap[postID] = true
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	var enrichedPosts []*CommunityPostWithMeta
 	for _, post := range posts {
 		enriched := &CommunityPostWithMeta{
 			Post:         post,
 			LikeCount:    likeMap[post.Id],
 			CommentCount: commentMap[post.Id],
+			UserLiked:    likeMap[post.Id] > 0,
 		}
 		enrichedPosts = append(enrichedPosts, enriched)
 	}

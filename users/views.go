@@ -4,6 +4,9 @@ import (
 	"allcoaching-go/models"
 	"allcoaching-go/services"
 	"allcoaching-go/utils"
+	"fmt"
+	"math/rand"
+	"time"
 )
 
 type UserController struct {
@@ -52,6 +55,34 @@ func (c *UserController) Get() {
 		return map[string]interface{}{
 			"status":  "false",
 			"message": "User Is Not Authenticated",
+		}, nil
+	})
+}
+
+func generateOTP() string {
+	rand.Seed(time.Now().UnixNano())               // always seed random
+	return fmt.Sprintf("%06d", rand.Intn(1000000)) // 000000 to 999999
+}
+
+func (c *UserController) LoginUser() {
+	c.Models = &models.LoginSerializer{}
+	c.Create(func() (interface{}, error) {
+		otp := generateOTP()
+		phone := c.Models.(*models.LoginSerializer).Phone
+		value, err := services.SendOtp(phone, otp)
+		if err != nil {
+			return nil, err
+		}
+		println(value)
+		val, err := models.CreateOtp(phone, otp)
+
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"status":  "true",
+			"message": "OTP sent successfully",
+			"data":    val,
 		}, nil
 	})
 }

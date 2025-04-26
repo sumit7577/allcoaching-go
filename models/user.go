@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // User represents the user model.
@@ -13,7 +14,7 @@ type User struct {
 	Username    string    `orm:"size(100); null; unique"`
 	Email       string    `orm:"size(100); notnull; unique" valid:"Required; MaxSize(100); Email"`
 	Password    string    `orm:"size(400); notnull" valid:"Required"`
-	Phone       string    `orm:"size(13); notnull; unique" valid:"Required; Match(^\\+\\d{2}\\d{10}$)"`
+	Phone       string    `orm:"size(10); notnull; unique" valid:"Required; Match(^\\d{10}$)"`
 	State       string    `orm:"size(100); null" valid:"MaxSize(100)"`
 	Pincode     uint64    `orm:"digit(10); null"`
 	Address     string    `orm:"size(400); null" valid:"MaxSize(400)"`
@@ -30,9 +31,17 @@ type AuthToken struct {
 	User    *User     `orm:"rel(one); unique; notnull"`   // Foreign key to CustomUser
 }
 
+type Otp struct {
+	Id      int64     `orm:"auto"`
+	Phone   string    `orm:"size(10); notnull; unique" valid:"Required; Match(^\\d{10}$)"`
+	Otp     string    `orm:"size(6); notnull" valid:"Required; MaxSize(6)"`
+	Created time.Time `orm:"auto_now_add;type(datetime)"`
+}
+
 func init() {
 	orm.RegisterModel(new(User))
 	orm.RegisterModel(new(AuthToken))
+	orm.RegisterModel(new(Otp))
 }
 
 func GetUserToken(token string) (*User, error) {
@@ -51,4 +60,34 @@ func GetUserToken(token string) (*User, error) {
 	}
 
 	return authToken.User, nil
+}
+
+type LoginSerializer struct {
+	Phone string `json:"phone" valid:"Required; Match(^\\d{10}$)"`
+}
+
+func CreateOtp(phone string, otp string) (*Otp, error) {
+	o := orm.NewOrm()
+	otpModel := &Otp{
+		Phone: phone,
+		Otp:   otp,
+	}
+	_, err := o.Insert(otpModel)
+	if err != nil {
+		return nil, err
+	}
+	go func(phone string, otp string) {
+		time.Sleep(30 * time.Second) // wait 30 seconds
+
+		o := orm.NewOrm()
+		_, err := o.QueryTable("otp").Filter("phone", phone).Filter("otp", otp).Delete()
+		if err != nil {
+			// Log the error, optional
+			logs.Error("Failed to auto-delete OTP:", err)
+		} else {
+			logs.Info("OTP auto-deleted after 30 seconds for phone:", phone)
+		}
+	}(phone, otp)
+
+	return otpModel, nil
 }

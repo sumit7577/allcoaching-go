@@ -24,4 +24,13 @@ func init() {
 			Filters:          nil,
 			Params:           nil})
 
+	web.GlobalControllerRouter["allcoaching-go/users:UserController"] = append(web.GlobalControllerRouter["allcoaching-go/users:UserController"],
+		web.ControllerComments{
+			Method:           "LoginUser",
+			Router:           "/login",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
 }

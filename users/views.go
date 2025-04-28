@@ -86,3 +86,33 @@ func (c *UserController) LoginUser() {
 		}, nil
 	})
 }
+
+// @Title Verify User
+// @Description Verify the user with OTP
+// @Param	body	body	models.OtpSerializer	true	"OTP data in JSON format"
+// @Success 200 {object} models.User
+// @Failure 400 Bad Request
+// @router /verify [post]
+func (c *UserController) VerifyUser() {
+	c.Models = &models.OtpSerializer{}
+	c.Create(func() (interface{}, error) {
+		phone := c.Models.(*models.OtpSerializer).Phone
+		otp := c.Models.(*models.OtpSerializer).Otp
+		user, err := models.VerifyOtp(phone, otp)
+		if err != nil {
+			return nil, err
+		}
+		if user == nil {
+			return map[string]interface{}{
+				"status":  "true",
+				"message": "No User Found",
+				"data":    nil,
+			}, nil
+		}
+		return map[string]interface{}{
+			"status":  "true",
+			"message": "User verified successfully",
+			"data":    user,
+		}, nil
+	})
+}

@@ -91,3 +91,28 @@ func CreateOtp(phone string, otp string) (*Otp, error) {
 
 	return otpModel, nil
 }
+
+type OtpSerializer struct {
+	Phone string `json:"phone" valid:"Required; Match(^\\d{10}$)"`
+	Otp   string `json:"otp" valid:"Required; MaxSize(6)"`
+}
+
+func VerifyOtp(phone string, otp string) (*AuthToken, error) {
+	o := orm.NewOrm()
+	otpModel := &Otp{}
+	err := o.QueryTable("otp").Filter("phone", phone).Filter("otp", otp).One(otpModel)
+	if err != nil {
+		return nil, err
+	}
+	user := &User{}
+	err = o.QueryTable("user").Filter("phone", phone).One(user)
+	if err == orm.ErrNoRows {
+		return nil, nil
+	}
+	authToken := &AuthToken{}
+	err = o.QueryTable("auth_token").Filter("user__id", user.Id).RelatedSel("user").One(authToken)
+	if err == nil {
+		return authToken, nil
+	}
+	return nil, err
+}

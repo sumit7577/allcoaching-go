@@ -49,3 +49,17 @@ func (c *InstituteController) Get() {
 		return nil, errors.New("Institute not found")
 	})
 }
+
+func (c *InstituteController) GetAllCategories() {
+	//c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		data, err := models.GetAllCategories()
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"status": "true",
+			"data":   data,
+		}, nil
+	})
+}

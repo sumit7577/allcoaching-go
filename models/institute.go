@@ -122,3 +122,13 @@ func GetCategoriesWithInstitutes() ([]InstituteSerializer, error) {
 
 	return result, nil
 }
+
+func GetAllCategories() ([]*Category, error) {
+	o := orm.NewOrm()
+	var categories []*Category
+	_, err := o.QueryTable("category").All(&categories)
+	if err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

@@ -110,7 +110,7 @@ func GetCategoriesWithInstitutes() ([]InstituteSerializer, error) {
 
 	for _, category := range categories {
 		var institutes []*Institute
-		_, err := o.QueryTable("institute").Filter("Category__Id", category.Id).All(&institutes, "id", "name", "about", "director_name", "image", "date_created", "date_updated")
+		_, err := o.QueryTable("institute").Filter("Category__Id", category.Id).Exclude("name", "Allcoaching").All(&institutes, "id", "name", "about", "director_name", "image", "date_created", "date_updated")
 		if err != nil {
 			return nil, err
 		}
@@ -131,4 +131,30 @@ func GetAllCategories() ([]*Category, error) {
 		return nil, err
 	}
 	return categories, nil
+}
+
+func GetAllHomeBanner() ([]*Banner, error) {
+	o := orm.NewOrm()
+	var course Course
+	err := o.QueryTable("course").
+		Filter("Institute__Name", "Allcoaching").
+		Filter("Name", "Allcoaching_banner").
+		One(&course)
+
+	if course.Id == 0 {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	var banners []*Banner
+	_, err = o.LoadRelated(&course, "Banner")
+
+	if err != nil {
+		return nil, nil
+	}
+	banners = append(banners, course.Banner...)
+
+	return banners, nil
 }

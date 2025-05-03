@@ -25,6 +25,20 @@ func (c *InstituteController) Home() {
 	})
 }
 
+func (c *InstituteController) GetAllHomeBanner() {
+	//c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		data, err := models.GetAllHomeBanner()
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"status": "true",
+			"data":   data,
+		}, nil
+	})
+}
+
 func (c *InstituteController) Get() {
 	//c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {

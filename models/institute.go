@@ -1,6 +1,8 @@
 package models
 
 import (
+	"log"
+	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -22,6 +24,7 @@ type Institute struct {
 
 func init() {
 	orm.RegisterModel(new(Institute))
+	//InitSearchVector()
 }
 
 func GetAllInstitues() (num int64, institutes []*Institute, err error) {
@@ -157,4 +160,97 @@ func GetAllHomeBanner() ([]*Banner, error) {
 	banners = append(banners, course.Banner...)
 
 	return banners, nil
+}
+
+func GetSearchIns(query string) ([]*Institute, error) {
+	o := orm.NewOrm()
+	//InitSearchVector()
+	var institutes []*Institute
+
+	// Prepare the tsquery string with prefix search
+	terms := strings.Fields(query)
+	for i, term := range terms {
+		terms[i] = term + ":*"
+	}
+	tsQuery := strings.Join(terms, " & ")
+
+	sql := `
+		SELECT id, name, about, image, director_name, date_created, date_updated
+		FROM institute, to_tsquery('english', ?) query
+		WHERE search_vector @@ query
+		ORDER BY ts_rank(search_vector, query) DESC;
+	`
+
+	_, err := o.Raw(sql, tsQuery).QueryRows(&institutes)
+	if err != nil {
+		return nil, err
+	}
+	return institutes, nil
+}
+
+func InitSearchVector() {
+	o := orm.NewOrm()
+
+	sqls := []string{
+		// 1. Add search_vector column if it doesn't exist
+		`DO $$
+		BEGIN
+			IF NOT EXISTS (
+				SELECT 1 FROM information_schema.columns
+				WHERE table_name='institute' AND column_name='search_vector'
+			) THEN
+				ALTER TABLE institute ADD COLUMN search_vector tsvector;
+			END IF;
+		END
+		$$;`,
+
+		// 2. Populate search_vector initially
+		`UPDATE institute
+		 SET search_vector = to_tsvector('english',
+			coalesce(name, '') || ' ' || coalesce(about, '') || ' ' || coalesce(director_name, ''));`,
+
+		// 3. Create GIN index if not exists
+		`DO $$
+		BEGIN
+			IF NOT EXISTS (
+				SELECT 1 FROM pg_indexes
+				WHERE indexname = 'idx_institute_search_vector'
+			) THEN
+				CREATE INDEX idx_institute_search_vector ON institute USING GIN(search_vector);
+			END IF;
+		END
+		$$;`,
+
+		// 4. Create trigger function if not exists
+		`CREATE OR REPLACE FUNCTION institute_search_vector_trigger() RETURNS trigger AS $$
+		begin
+			new.search_vector :=
+				to_tsvector('english',
+				coalesce(new.name, '') || ' ' || coalesce(new.about, '') || ' ' || coalesce(new.director_name, ''));
+			return new;
+		end
+		$$ LANGUAGE plpgsql;`,
+
+		// 5. Create trigger itself
+		`DO $$
+		BEGIN
+			IF NOT EXISTS (
+				SELECT 1 FROM pg_trigger WHERE tgname = 'tsvectorupdate'
+			) THEN
+				CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE
+				ON institute FOR EACH ROW EXECUTE FUNCTION institute_search_vector_trigger();
+			END IF;
+		END
+		$$;`,
+	}
+
+	for _, sql := range sqls {
+		_, err := o.Raw(sql).Exec()
+		if err != nil {
+			log.Println("❌ Failed SQL:", sql)
+			log.Println("Error:", err)
+		} else {
+			log.Println("✅ Successfully executed SQL step.")
+		}
+	}
 }

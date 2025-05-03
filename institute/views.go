@@ -77,3 +77,20 @@ func (c *InstituteController) GetAllCategories() {
 		}, nil
 	})
 }
+
+func (c *InstituteController) GetSearchInstitute() {
+	c.ApiView(func() (interface{}, error) {
+		query := c.GetString("query")
+		if query == "" {
+			return nil, errors.New("No Institute found")
+		}
+		data, err := models.GetSearchIns(query)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{
+			"status": "true",
+			"data":   data,
+		}, nil
+	})
+}

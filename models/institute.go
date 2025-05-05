@@ -46,9 +46,10 @@ type CourseSerializer struct {
 	TestSeries []*TestSeries   `json:"testseries"`
 	Institute  *Institute      `json:"institute"`
 	Documents  []*Documents    `json:"documents"`
+	Followed   bool            `json:"followed"`
 }
 
-func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
+func GetInstitute(uid int64, page int, user *User) (*PaginationSerializer, error) {
 	o := orm.NewOrm()
 	var courses []*Course
 	var videos []*CourseVideos
@@ -76,6 +77,8 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 	//Fetch institute detail
 	err = o.QueryTable("institute").RelatedSel("banner", "category").Filter("Id", uid).One(&institute)
 
+	count, err := o.QueryTable("institute_users").Filter("institute_id", uid).Filter("user_id", user.Id).Count()
+
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +89,7 @@ func GetInstitute(uid int64, page int) (*PaginationSerializer, error) {
 		Institute:  &institute,
 		TestSeries: testSeries,
 		Documents:  documents,
+		Followed:   count > 0,
 	}
 
 	data, err := query.CreatePagination(serializer)

@@ -40,7 +40,7 @@ func (c *InstituteController) GetAllHomeBanner() {
 }
 
 func (c *InstituteController) Get() {
-	//c.Permissions = []string{services.IsAuthenticated}
+	c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {
 		id := c.GetString(":uid")
 		page, _ := c.GetInt("page")
@@ -49,7 +49,7 @@ func (c *InstituteController) Get() {
 			if err != nil {
 				return nil, errors.New("Invalid Institute ID")
 			}
-			ins, err := models.GetInstitute(uid, page)
+			ins, err := models.GetInstitute(uid, page, c.CurrentUser)
 			if err != nil {
 				return nil, errors.New("Institute not found")
 			}

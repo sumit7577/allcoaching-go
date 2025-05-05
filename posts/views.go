@@ -15,7 +15,7 @@ func (c *PostController) Get() {
 	c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {
 		page, _ := c.GetInt("page")
-		posts, err := models.GetAllPosts(page, c.CurrentUser)
+		posts, err := models.GetAllPosts(page, c.CurrentUser, 0)
 		if err != nil {
 			return nil, errors.New("Posts Not Found")
 		}
@@ -24,6 +24,30 @@ func (c *PostController) Get() {
 			"status": "true",
 			"data":   posts,
 		}, nil
+	})
+}
+
+func (c *PostController) GetByInsID() {
+	c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		id := c.GetString(":uid")
+		page, _ := c.GetInt("page")
+		if id != "" {
+			uid, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, errors.New("Invalid Post ID")
+			}
+			post, err := models.GetAllPosts(page, c.CurrentUser, uid)
+			if err != nil {
+				return nil, errors.New("Post Not Found")
+			}
+
+			return map[string]interface{}{
+				"status": "true",
+				"data":   post,
+			}, nil
+		}
+		return nil, errors.New("Post Not Found")
 	})
 }
 

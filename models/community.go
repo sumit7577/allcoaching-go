@@ -58,16 +58,26 @@ type CommentResult struct {
 	Count  int64 `orm:"column(count)"`
 }
 
-func GetAllPosts(page int, user *User) (*PaginationSerializer, error) {
+func GetAllPosts(page int, user *User, insId int64) (*PaginationSerializer, error) {
 	o := orm.NewOrm()
 	var posts []*CommunityPost
+
+	q := o.QueryTable("community_post")
+	if insId != 0 {
+		q = q.Filter("institute_id", insId)
+	}
 
 	query := &Pagination{
 		Offset: page,
 		Limit:  10,
-		query:  o.QueryTable("community_post"),
+		query:  q,
 	}
-	_, errs := query.Paginate().RelatedSel("institute").OrderBy("-Id").All(&posts)
+	qs := query.Paginate().OrderBy("-Id")
+	if insId == 0 {
+		qs = qs.RelatedSel("institute")
+	}
+
+	_, errs := qs.All(&posts)
 
 	if errs != nil {
 		return nil, errs

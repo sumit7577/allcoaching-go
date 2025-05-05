@@ -94,3 +94,25 @@ func (c *InstituteController) GetSearchInstitute() {
 		}, nil
 	})
 }
+
+func (c *InstituteController) ToggleFollow() {
+	c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		id := c.GetString(":uid")
+		if id != "" {
+			uid, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, errors.New("Invalid Institute ID")
+			}
+			message, err := models.ToggleFollowInstitute(uid, c.CurrentUser)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]interface{}{
+				"status":  "true",
+				"message": message,
+			}, nil
+		}
+		return nil, errors.New("Institute not found")
+	})
+}

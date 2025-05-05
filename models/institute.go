@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -17,6 +18,7 @@ type Institute struct {
 	Banner       *Banner   `orm:"rel(fk); null"`
 	DirectorName string    `orm:"size(150); notnull" valid:"Required; MaxSize(150)"`
 	User         *User     `orm:"rel(one); unique; notnull"`
+	Followers    []*User   `orm:"rel(m2m); null"`
 	Image        string    `orm:"size(300); null"`
 	DateCreated  time.Time `orm:"auto_now_add;type(datetime)"`
 	DateUpdated  time.Time `orm:"auto_now;type(datetime)"`
@@ -252,5 +254,28 @@ func InitSearchVector() {
 		} else {
 			log.Println("✅ Successfully executed SQL step.")
 		}
+	}
+}
+
+func ToggleFollowInstitute(uid int64, user *User) (string, error) {
+	o := orm.NewOrm()
+	institute := &Institute{Id: uid}
+
+	count, err := o.QueryTable("institute_users").Filter("institute_id", uid).Filter("user_id", user.Id).Count()
+	if err != nil {
+		return fmt.Sprintf("Error checking follow status: %s", err), err
+	}
+
+	m2m := o.QueryM2M(institute, "Followers")
+	if count > 0 {
+		if _, err := m2m.Remove(user); err != nil {
+			return "", err
+		}
+		return "Institute Unfollowed", nil
+	} else {
+		if _, err := m2m.Add(user); err != nil {
+			return "", err
+		}
+		return "Institute Followed", nil
 	}
 }

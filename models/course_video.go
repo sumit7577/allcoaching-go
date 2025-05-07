@@ -17,6 +17,102 @@ type CourseVideos struct {
 	UpdatedAt   time.Time `orm:"auto_now;type(datetime)"`
 }
 
+type VideoLike struct {
+	Id        int64         `orm:"auto"`
+	Video     *CourseVideos `orm:"rel(fk); notnull"`
+	User      *User         `orm:"rel(fk); notnull"`
+	CreatedAt time.Time     `orm:"auto_now_add;type(datetime)"`
+	UpdatedAt time.Time     `orm:"auto_now;type(datetime)"`
+}
+
+type VideoComment struct {
+	Id        int64         `orm:"auto"`
+	Video     *CourseVideos `orm:"rel(fk); notnull"`
+	User      *User         `orm:"rel(fk); notnull"`
+	Comment   string        `orm:"size(500); notnull" valid:"Required; MaxSize(500)"`
+	CreatedAt time.Time     `orm:"auto_now_add;type(datetime)"`
+	UpdatedAt time.Time     `orm:"auto_now;type(datetime)"`
+}
+
 func init() {
 	orm.RegisterModel(new(CourseVideos))
+	orm.RegisterModel(new(VideoLike))
+	orm.RegisterModel(new(VideoComment))
+}
+
+func GetAllVideoComments(videoID int64, page int) (*PaginationSerializer, error) {
+	o := orm.NewOrm()
+	var comments []*VideoComment
+
+	query := &Pagination{
+		Offset: page,
+		Limit:  10,
+		query:  o.QueryTable("video_comment").Filter("video_id", videoID),
+	}
+	_, errs := query.Paginate().RelatedSel("user").OrderBy("-Id").All(&comments)
+
+	if errs != nil {
+		return nil, errs
+	}
+
+	data, err := query.CreatePagination(comments)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+type CommentVideoSerializer struct {
+	VideoID int64  `json:"video_id" valid:"Required"`
+	Comment string `json:"comment" valid:"Required"`
+}
+
+func CommentVideo(videoID int64, user *User, comment string) (*VideoComment, error) {
+	o := orm.NewOrm()
+
+	commentObj := &VideoComment{
+		Video:   &CourseVideos{Id: videoID},
+		User:    user,
+		Comment: comment,
+	}
+
+	if _, err := o.Insert(commentObj); err != nil {
+		return nil, err
+	}
+
+	return commentObj, nil
+}
+
+type LikeVideoSerializer struct {
+	VideoID int64 `json:"video_id" valid:"Required"`
+}
+
+func LikeVideo(videoID int64, user *User) (bool, error) {
+	o := orm.NewOrm()
+
+	qs := o.QueryTable("video_like").Filter("video_id", videoID).Filter("user_id", user.Id)
+
+	exists := qs.Exist()
+
+	if exists {
+		// Like exists → remove it (unlike)
+		_, err := qs.Delete()
+		if err != nil {
+			return false, err
+		}
+		return false, nil
+	}
+
+	like := &VideoLike{
+		Video: &CourseVideos{Id: videoID},
+		User:  &User{Id: user.Id},
+	}
+
+	if _, err := o.Insert(like); err != nil {
+		return false, err
+	}
+
+	return true, nil
+
 }

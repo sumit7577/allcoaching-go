@@ -5,6 +5,7 @@ import (
 	"allcoaching-go/posts"
 	"allcoaching-go/test_series"
 	"allcoaching-go/users"
+	"allcoaching-go/videos"
 
 	"github.com/beego/beego/v2/server/web"
 )
@@ -30,6 +31,11 @@ func init() {
 		web.NSNamespace("/posts",
 			web.NSInclude(
 				&posts.PostController{},
+			),
+		),
+		web.NSNamespace("/videos",
+			web.NSInclude(
+				&videos.VideoController{},
 			),
 		),
 	)

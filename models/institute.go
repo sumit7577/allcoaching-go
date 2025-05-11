@@ -41,12 +41,13 @@ func GetAllInstitues() (num int64, institutes []*Institute, err error) {
 }
 
 type CourseSerializer struct {
-	Course     []*Course       `json:"course"`
-	Videos     []*CourseVideos `json:"videos"`
-	TestSeries []*TestSeries   `json:"testseries"`
-	Institute  *Institute      `json:"institute"`
-	Documents  []*Documents    `json:"documents"`
-	Followed   bool            `json:"followed"`
+	Course         []*Course       `json:"course"`
+	Videos         []*CourseVideos `json:"videos"`
+	TestSeries     []*TestSeries   `json:"testseries"`
+	Institute      *Institute      `json:"institute"`
+	Documents      []*Documents    `json:"documents"`
+	Followed       bool            `json:"followed"`
+	FollowersCount int64           `json:"followers_count"`
 }
 
 func GetInstitute(uid int64, page int, user *User) (*PaginationSerializer, error) {
@@ -84,12 +85,13 @@ func GetInstitute(uid int64, page int, user *User) (*PaginationSerializer, error
 	}
 
 	serializer := &CourseSerializer{
-		Course:     courses,
-		Videos:     videos,
-		Institute:  &institute,
-		TestSeries: testSeries,
-		Documents:  documents,
-		Followed:   count > 0,
+		Course:         courses,
+		Videos:         videos,
+		Institute:      &institute,
+		TestSeries:     testSeries,
+		Documents:      documents,
+		Followed:       count > 0,
+		FollowersCount: count,
 	}
 
 	data, err := query.CreatePagination(serializer)
@@ -99,7 +101,6 @@ func GetInstitute(uid int64, page int, user *User) (*PaginationSerializer, error
 	}
 
 	return data, nil
-
 }
 
 type InstituteSerializer struct {

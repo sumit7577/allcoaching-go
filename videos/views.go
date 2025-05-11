@@ -66,7 +66,6 @@ func (c *VideoController) LikeVideo() {
 			data, err := models.LikeVideo(request.VideoID, c.CurrentUser)
 			if err != nil {
 				return nil, err
-
 			}
 			return map[string]interface{}{
 				"status": "true",
@@ -94,5 +93,29 @@ func (c *VideoController) IncreaseViewCount() {
 			}, nil
 		})
 		return nil, nil
+	})
+}
+
+func (c *VideoController) GetVideoLikeCount() {
+	c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		id := c.GetString(":uid")
+		if id != "" {
+			uid, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, errors.New("Invalid Video ID")
+			}
+			ins, err := models.GetVideoLikeCount(uid, c.CurrentUser)
+			if err != nil {
+				return nil, errors.New("Video Like Not found!")
+			}
+
+			return map[string]interface{}{
+				"status": "true",
+				"data":   ins,
+			}, nil
+
+		}
+		return nil, errors.New("Video Id Not found!")
 	})
 }

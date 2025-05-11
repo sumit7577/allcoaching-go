@@ -32,4 +32,22 @@ func init() {
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})
+
+	web.GlobalControllerRouter["allcoaching-go/videos:VideoController"] = append(web.GlobalControllerRouter["allcoaching-go/videos:VideoController"],
+		web.ControllerComments{
+			Method:           "IncreaseViewCount",
+			Router:           "/views/",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	web.GlobalControllerRouter["allcoaching-go/videos:VideoController"] = append(web.GlobalControllerRouter["allcoaching-go/videos:VideoController"],
+		web.ControllerComments{
+			Method:           "GetVideoLikeCount",
+			Router:           "/likes/:uid",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
 }

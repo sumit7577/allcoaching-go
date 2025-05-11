@@ -132,3 +132,24 @@ func IncreaseViewCount(videoID int64) (int64, error) {
 
 	return video.Views, nil
 }
+
+type VideoLikeCountSerializer struct {
+	UserLiked bool  `json:"user_liked"`
+	TotalLike int64 `json:"total_like"`
+}
+
+func GetVideoLikeCount(videoID int64, user *User) (VideoLikeCountSerializer, error) {
+	o := orm.NewOrm()
+
+	qs := o.QueryTable("video_like").Filter("video_id", videoID)
+	count, err := qs.Count()
+	if err != nil {
+		return VideoLikeCountSerializer{}, err
+	}
+	userLiked := qs.Filter("user_id", user.Id).Exist()
+
+	return VideoLikeCountSerializer{
+		UserLiked: userLiked,
+		TotalLike: count,
+	}, nil
+}

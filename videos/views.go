@@ -76,3 +76,23 @@ func (c *VideoController) LikeVideo() {
 		return nil, nil
 	})
 }
+
+func (c *VideoController) IncreaseViewCount() {
+	c.Permissions = []string{services.IsAuthenticated}
+	c.Models = &models.LikeVideoSerializer{}
+	c.ApiView(func() (interface{}, error) {
+		c.Create(func() (interface{}, error) {
+			request := c.Models.(*models.LikeVideoSerializer)
+
+			data, err := models.IncreaseViewCount(request.VideoID)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]interface{}{
+				"status": "true",
+				"data":   data,
+			}, nil
+		})
+		return nil, nil
+	})
+}

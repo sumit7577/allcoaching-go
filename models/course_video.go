@@ -13,6 +13,7 @@ type CourseVideos struct {
 	Description string    `orm:"type(text); null"`
 	Video       string    `orm:"size(300); null"`
 	Metadata    string    `orm:"type(jsonb); null"`
+	Views       int64     `orm:"default(0)"`
 	CreatedAt   time.Time `orm:"auto_now_add;type(datetime)"`
 	UpdatedAt   time.Time `orm:"auto_now;type(datetime)"`
 }
@@ -114,5 +115,20 @@ func LikeVideo(videoID int64, user *User) (bool, error) {
 	}
 
 	return true, nil
+}
 
+func IncreaseViewCount(videoID int64) (int64, error) {
+	o := orm.NewOrm()
+	video := &CourseVideos{Id: videoID}
+
+	if err := o.Read(video); err != nil {
+		return 0, err
+	}
+
+	video.Views++
+	if _, err := o.Update(video); err != nil {
+		return 0, err
+	}
+
+	return video.Views, nil
 }

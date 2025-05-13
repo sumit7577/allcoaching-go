@@ -97,16 +97,18 @@ func (c *UserController) VerifyUser() {
 		phone := c.Models.(*models.OtpSerializer).Phone
 		otp := c.Models.(*models.OtpSerializer).Otp
 		user, err := models.VerifyOtp(phone, otp)
-		if err.Error() == "User not found" {
-			return map[string]interface{}{
-				"status":  "true",
-				"message": "No User Found",
-				"data":    user,
-			}, nil
-		}
+
 		if err != nil {
+			if err.Error() == "User not found" {
+				return map[string]interface{}{
+					"status":  "true",
+					"message": "No User Found",
+					"data":    user,
+				}, nil
+			}
 			return nil, err
 		}
+
 		return map[string]interface{}{
 			"status":  "true",
 			"message": "User verified successfully",

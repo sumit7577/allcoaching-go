@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
 )
 
 // User represents the user model.
@@ -77,7 +78,7 @@ func CreateOtp(phone string, otp string) (*Otp, error) {
 	if err != nil {
 		return nil, err
 	}
-	/*go func(phone string, otp string) {
+	go func(phone string, otp string) {
 		time.Sleep(30 * time.Second) // wait 30 seconds
 
 		o := orm.NewOrm()
@@ -88,7 +89,7 @@ func CreateOtp(phone string, otp string) (*Otp, error) {
 		} else {
 			logs.Info("OTP auto-deleted after 30 seconds for phone:", phone)
 		}
-	}(phone, otp)*/
+	}(phone, otp)
 
 	return otpModel, nil
 }
@@ -97,8 +98,6 @@ type OtpSerializer struct {
 	Phone string `json:"phone" valid:"Required; Match(^\\d{10}$)"`
 	Otp   string `json:"otp" valid:"Required; MaxSize(6)"`
 }
-
-var ErrUserNotFound = errors.New("User not found")
 
 func VerifyOtp(phone string, otp string) (*AuthToken, error) {
 	o := orm.NewOrm()

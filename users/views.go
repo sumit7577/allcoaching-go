@@ -34,7 +34,6 @@ func (c *UserController) Post() {
 			"data":    user,
 		}, nil
 	})
-
 }
 
 // @Title Get User
@@ -69,11 +68,10 @@ func (c *UserController) LoginUser() {
 	c.Create(func() (interface{}, error) {
 		otp := generateOTP()
 		phone := c.Models.(*models.LoginSerializer).Phone
-		value, err := services.SendOtp(phone, otp)
+		_, err := services.SendOtp(phone, otp)
 		if err != nil {
 			return nil, err
 		}
-		println(value)
 		val, err := models.CreateOtp(phone, otp)
 
 		if err != nil {
@@ -99,20 +97,44 @@ func (c *UserController) VerifyUser() {
 		phone := c.Models.(*models.OtpSerializer).Phone
 		otp := c.Models.(*models.OtpSerializer).Otp
 		user, err := models.VerifyOtp(phone, otp)
-		if err != nil {
-			return nil, err
-		}
-		if user == nil {
+		if err.Error() == "User not found" {
 			return map[string]interface{}{
 				"status":  "true",
 				"message": "No User Found",
-				"data":    nil,
+				"data":    user,
 			}, nil
+		}
+		if err != nil {
+			return nil, err
 		}
 		return map[string]interface{}{
 			"status":  "true",
 			"message": "User verified successfully",
 			"data":    user,
 		}, nil
+	})
+}
+
+func (c *UserController) CompleteUserVerify() {
+	c.Models = &models.CompleteUserSignupSerializer{}
+	c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		c.Create(func() (interface{}, error) {
+			request := c.Models.(*models.CompleteUserSignupSerializer)
+			user := c.CurrentUser
+			user.Name = request.Name
+			user.Email = request.Email
+			user.Username = models.GenerateRandomUsername(request.Name)
+			user, err := models.CompleteUserVerification(c.CurrentUser)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]interface{}{
+				"status":  "true",
+				"message": "User verified successfully",
+				"data":    user,
+			}, nil
+		})
+		return nil, nil
 	})
 }

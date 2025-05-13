@@ -23,7 +23,7 @@ func sanitizeName(name string) string {
 }
 
 // generateRandomUsername generates a random username by appending random numbers to the sanitized name.
-func generateRandomUsername(name string) string {
+func GenerateRandomUsername(name string) string {
 	sanitizedName := sanitizeName(name)
 	rand.Seed(time.Now().UnixNano())
 	randomNumber := rand.Intn(10000)
@@ -41,7 +41,7 @@ func (um *UserManager) CreateUser() (*User, error) {
 		if err != nil {
 			return err
 		}
-		username := generateRandomUsername(um.User.Name)
+		username := GenerateRandomUsername(um.User.Name)
 		um.User.Password = hashedPassword
 		um.User.Username = username
 		id, err := txOrm.Insert(um.User)
@@ -50,21 +50,17 @@ func (um *UserManager) CreateUser() (*User, error) {
 		if err != nil {
 			return err // This will trigger a rollback
 		}
-		return nil
-		/*authToken, nil := generateAuthToken()
+		authToken, nil := generateAuthToken()
 		authEntry := &AuthToken{
-			Key:     authToken,
-			User:    um.User,
-			Created: time.Now(),
+			Key:  authToken,
+			User: &User{Id: um.User.Id},
 		}
 		_, err = txOrm.Insert(authEntry)
-		fmt.Printf("authEntry: %v\n", authEntry)
-		fmt.Printf("authEntry: %v\n", um.User)
 
 		if err != nil {
 			return err
-		}*/
-
+		}
+		return nil
 	})
 
 	if err != nil {

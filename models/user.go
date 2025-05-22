@@ -48,7 +48,6 @@ func init() {
 
 func GetUserToken(token string) (*User, error) {
 	o := orm.NewOrm()
-
 	// Create an AuthToken object to load the related User
 	authToken := AuthToken{}
 

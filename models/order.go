@@ -49,15 +49,7 @@ func CompleteOrder(signature string, event OrderRazorPayWebhookEvent) error {
 	paymentID := paymentEntity["id"].(string)
 	apiSecret, err := web.AppConfig.String("razorpay-api::apisecret")
 	if err != nil {
-		return fmt.Errorf("error reading API secret: %v", err)
-	}
-	params := map[string]interface{}{
-		"razorpay_order_id":   orderID,
-		"razorpay_payment_id": paymentID,
-	}
-	//success := utils.CheckSignature(signature, params, apiSecret)
-	if !success {
-		return fmt.Errorf("signature verification failed: %v", err)
+		return fmt.Errorf("error reading API secret: %v %s", err, apiSecret)
 	}
 	order := Order{OrderId: orderID}
 	err = o.Read(&order, "OrderId")
@@ -65,7 +57,7 @@ func CompleteOrder(signature string, event OrderRazorPayWebhookEvent) error {
 		return err
 	}
 	order.Status = "COMPLETED"
-	order.PaymentId = event.Payload["payment_id"].(string)
+	order.PaymentId = paymentID
 	order.Signature = signature
 	_, err = o.Update(&order)
 	course := Course{Id: order.Course.Id}
@@ -73,7 +65,7 @@ func CompleteOrder(signature string, event OrderRazorPayWebhookEvent) error {
 		return err
 	}
 
-	m2m := o.QueryM2M(&course, "Users")
+	m2m := o.QueryM2M(&course, "User")
 	if _, err := m2m.Add(order.User); err != nil {
 		return fmt.Errorf("failed to add user to course: %v", err)
 	}

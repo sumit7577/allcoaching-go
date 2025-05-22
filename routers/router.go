@@ -3,6 +3,7 @@ package routers
 import (
 	"allcoaching-go/courses"
 	"allcoaching-go/institute"
+	"allcoaching-go/orders"
 	"allcoaching-go/posts"
 	"allcoaching-go/test_series"
 	"allcoaching-go/users"
@@ -32,6 +33,11 @@ func init() {
 		web.NSNamespace("/testSeries",
 			web.NSInclude(
 				&test_series.TestSeriesController{},
+			),
+		),
+		web.NSNamespace("/orders",
+			web.NSInclude(
+				&orders.OrderController{},
 			),
 		),
 		web.NSNamespace("/posts",

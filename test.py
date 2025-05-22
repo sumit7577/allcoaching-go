@@ -1,0 +1,9 @@
+import hmac
+import hashlib
+
+secret = b"abcd"
+
+raw_body = '''{"entity":"event","account_id":"acc_QTzZ9GOI2VquQS","event":"order.paid","contains":["payment","order"],"payload":{"payment":{"entity":{"id":"pay_QY5UZMtJy2pdBK","entity":"payment","amount":29900,"currency":"INR","status":"captured","order_id":"order_QY5USOyB9SNVFt","invoice_id":null,"international":false,"method":"upi","amount_refunded":0,"refund_status":null,"captured":true,"description":"Most Affordable Batch\u2014 ONLY \u20b9299\/-\r\n\r\n19th May \u0938\u0947 \u0938\u094d\u091f\u093e\u0930\u094d\u091f \u0939\u094b \u0930\u0939\u093e \u0939\u0948 ! \u0930\u0940\u091c\u0928\u093f\u0902\u0917, \u0939\u093f\u0938\u094d\u091f\u094d\u0930\u0940 \u092f\u0947 \u0926\u094b \u0938\u092c\u094d\u091c\u0947\u0915\u094d\u091f \u0930\u093f\u0915\u0949\u0930\u094d\u0921 \u0939\u094b \u091a\u0941\u0915\u093e \u0939\u0948\u0964 \u0938\u093e\u092e\u093e\u0928\u094d\u092f \u0939\u093f\u0928\u094d\u0926\u0940 \u092c\u0939\u0941\u0924 \u0905\u091a\u094d\u091b\u0947 \u0938\u0947 \u0930\u093f\u0915\u0949\u0930\u094d\u0921 \u0915\u093f\u092f\u093e \u091c\u093e \u0930\u0939\u093e \u0939\u0948\u0964 \u0907\u0938 \u092c\u0948\u091a \u092e\u0947\u0902 19th May \u0938\u0947 \u0921"},"order":{"entity":{"id":"order_QY5USOyB9SNVFt","entity":"order","amount":29900,"amount_paid":29900,"amount_due":0,"currency":"INR","receipt":"receipt_user10_course8","offer_id":null,"status":"paid","attempts":1,"notes":[],"created_at":1747941551}}},"created_at":1747941559}'''
+
+signature = hmac.new(secret, raw_body.encode('utf-8'), hashlib.sha256).hexdigest()
+print("sign",signature)

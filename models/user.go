@@ -79,12 +79,11 @@ func CreateOtp(phone string, otp string) (*Otp, error) {
 		return nil, err
 	}
 	go func(phone string, otp string) {
-		time.Sleep(30 * time.Second) // wait 30 seconds
+		time.Sleep(60 * time.Second)
 
 		o := orm.NewOrm()
 		_, err := o.QueryTable("otp").Filter("phone", phone).Filter("otp", otp).Delete()
 		if err != nil {
-			// Log the error, optional
 			logs.Error("Failed to auto-delete OTP:", err)
 		} else {
 			logs.Info("OTP auto-deleted after 30 seconds for phone:", phone)

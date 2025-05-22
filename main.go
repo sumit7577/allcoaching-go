@@ -1,8 +1,8 @@
 package main
 
 import (
-	"allcoaching-go/allCoachingProject"
-	_ "allcoaching-go/allCoachingProject"
+	"allcoaching-go/allcoachingProject"
+	_ "allcoaching-go/allcoachingProject"
 	_ "allcoaching-go/routers"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -11,7 +11,7 @@ import (
 
 func main() {
 	orm.Debug = true
-	allCoachingProject.SetDatabase()
+	allcoachingProject.SetDatabase()
 	orm.RunSyncdb("default", false, true)
 	if web.BConfig.RunMode == "dev" {
 		web.BConfig.WebConfig.DirectoryIndex = true

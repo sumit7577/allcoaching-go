@@ -243,7 +243,6 @@ func SubmitTestSeries(payload *SubmitTestSerializer, user *User) (*TestSeriesAtt
 	}
 
 	return &attempt, nil
-
 }
 
 func CreateAttempts(payload *TestSeriesAttempt) (*TestSeriesAttempt, error) {

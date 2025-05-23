@@ -40,6 +40,14 @@ func GetCourse(user *User, page int, courseId int64) (*PaginationSerializer, err
 	if err := o.Read(course); err != nil {
 		return nil, fmt.Errorf("course not found: %w", err)
 	}
+	var banners []*Banner
+	if _, err := o.
+		QueryTable("banner").
+		Filter("Course__Course__Id", course.Id).
+		All(&banners); err != nil {
+		return nil, fmt.Errorf("failed to load banners: %w", err)
+	}
+	course.Banner = banners
 
 	query := &Pagination{
 		Offset: page,

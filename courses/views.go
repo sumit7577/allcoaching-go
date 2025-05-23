@@ -11,6 +11,29 @@ type CourseController struct {
 	services.RestApi
 }
 
+func (c *CourseController) Get() {
+	c.Permissions = []string{services.IsAuthenticated}
+	c.ApiView(func() (interface{}, error) {
+		id := c.GetString(":uid")
+		page, _ := c.GetInt("page")
+		if id != "" {
+			uid, err := strconv.ParseInt(id, 10, 64)
+			if err != nil {
+				return nil, errors.New("Invalid Course ID")
+			}
+			data, err := models.GetCourse(c.CurrentUser, page, uid)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]interface{}{
+				"status": "true",
+				"data":   data,
+			}, nil
+		}
+		return nil, errors.New("Course not found")
+	})
+}
+
 func (c *CourseController) Purchase() {
 	c.Permissions = []string{services.IsAuthenticated}
 	c.ApiView(func() (interface{}, error) {

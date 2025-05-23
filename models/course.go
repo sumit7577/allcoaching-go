@@ -30,6 +30,78 @@ func init() {
 	orm.RegisterModel(new(Course))
 }
 
+func GetCourse(user *User, page int, courseId int64) (*PaginationSerializer, error) {
+	o := orm.NewOrm()
+	var videos []*CourseVideos
+	var testSeries []*TestSeries
+	var documents []*Documents
+
+	course := &Course{Id: courseId}
+	if err := o.Read(course); err != nil {
+		return nil, fmt.Errorf("course not found: %w", err)
+	}
+
+	query := &Pagination{
+		Offset: page,
+		Limit:  10,
+		query:  o.QueryTable("course").Filter("Id", courseId),
+	}
+
+	if course.Price > 0 {
+		user := &User{Id: user.Id}
+		purchased := o.QueryM2M(course, "User").Exist(user)
+		if !purchased {
+			return nil, errors.New("course not purchased")
+		}
+	}
+
+	// Fetch course data (both for free and paid if purchased)
+	_, err := o.QueryTable("course_videos").
+		Filter("Course__Id", course.Id).
+		Limit(10).
+		All(&videos)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch videos: %w", err)
+	}
+
+	_, err = o.QueryTable("test_series").
+		Filter("Course__Id", course.Id).
+		Limit(10).
+		All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch test series: %w", err)
+	}
+
+	_, err = o.QueryTable("documents").
+		Filter("Course__Id", course.Id).
+		Limit(10).
+		All(&documents, "id", "name", "description", "file", "created_at", "updated_at")
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch documents: %w", err)
+	}
+
+	totalUser, err := o.QueryM2M(course, "User").Count()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch total users: %w", err)
+	}
+
+	serializer := &CourseSerializer{
+		Course:         []*Course{course},
+		Videos:         videos,
+		Institute:      &Institute{Id: course.Institute.Id},
+		TestSeries:     testSeries,
+		Documents:      documents,
+		Followed:       course.Price == 0 || o.QueryM2M(course, "User").Exist(&User{Id: user.Id}),
+		FollowersCount: totalUser,
+	}
+	data, err := query.CreatePagination(serializer)
+
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
 type OrderResponse struct {
 	Institute struct {
 		Name  string `json:"name"`

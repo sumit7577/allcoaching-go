@@ -68,12 +68,12 @@ func GetInstitute(uid int64, page int, user *User) (*PaginationSerializer, error
 	_, err := query.Paginate().RelatedSel("category").All(&courses)
 
 	//Fetch one Institute all course videos
-	_, err = o.QueryTable("course_videos").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&videos)
+	_, err = o.QueryTable("course_videos").Filter("Course__Institute__Id", uid).Filter("Course__Price", 0).Offset(page).Limit(10).All(&videos)
 
 	//Fetch one Institute all course test series
-	_, err = o.QueryTable("test_series").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")
+	_, err = o.QueryTable("test_series").Filter("Course__Institute__Id", uid).Filter("Course__Price", 0).Offset(page).Limit(10).All(&testSeries, "id", "name", "description", "questions", "timer", "created_at", "updated_at")
 
-	_, err = o.QueryTable("documents").Filter("Course__Institute__Id", uid).Offset(page).Limit(10).All(&documents, "id", "name", "description", "file", "created_at", "updated_at")
+	_, err = o.QueryTable("documents").Filter("Course__Institute__Id", uid).Filter("Course__Price", 0).Offset(page).Limit(10).All(&documents, "id", "name", "description", "file", "created_at", "updated_at")
 
 	//Fetch institute detail
 	err = o.QueryTable("institute").RelatedSel("banner", "category").Filter("Id", uid).One(&institute)
